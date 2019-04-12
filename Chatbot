@@ -1,0 +1,98 @@
+package chatbotexample;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.*;
+public class Chatbotexample extends JFrame {
+    
+    private JTextField txtEnter =new JTextField();
+    private JTextArea txtChat=new JTextArea();
+    private final Map<String,String> hm =  
+                        new HashMap< String,String>(); 
+    String[] keyword = getKeywords("txtname.txt");
+    
+    public Chatbotexample(){
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setSize(1000,600);
+        this.setVisible(true);
+        this.setResizable(false);
+        this.setLayout(null);
+        this.setTitle("ESN");
+         try {      
+                   for(String keyword:keyword)
+                    hm.put(keyword, dosyaOkuma(keyword));
+                } catch (IOException ex) {
+                    Logger.getLogger(Chatbotexample.class.getName()).log(Level.SEVERE, null, ex);
+                }
+        txtEnter.setLocation(2,540);
+        txtEnter.setSize(590,30);
+        txtEnter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                String uText=txtEnter.getText();
+                txtChat.append("You:"+uText+"\n");
+                for(String key: keyword)
+                if (uText.toLowerCase().contains(key)){
+                    txtChat.append("Bot:"+hm.get(key)+"\n\n");
+                }
+                txtEnter.setText("");
+            }  
+        });
+        txtChat.setLocation(15,5);
+        txtChat.setSize(960,910);
+   
+        this.add(txtEnter);
+        this.add(txtChat);
+   
+    }
+    
+    public String dosyaOkuma(String matchesWord) throws FileNotFoundException, IOException{
+              File file = new File("txtname.txt");
+              BufferedReader reader = null;
+              reader = new BufferedReader(new FileReader(file));
+              String soru = reader.readLine();
+              /*satır sayısı boyu 2 */
+             String cevap=new String();
+              float max=0;
+            while ((soru = reader.readLine()) != null) {
+                int eslesme=0,kelimesayisi=soru.split(" ").length;
+                for (int i = 0; i < kelimesayisi; i++) {
+                    if(soru.toLowerCase().matches(".*(what's|whats|what is)*.")&&soru.matches(".*(how can|how shall|How may|How do)*.")&&soru.contains(matchesWord)
+                            ){
+                        eslesme++;
+                        
+                }
+                }
+                if(1.f*eslesme/kelimesayisi > max) cevap = reader.readLine();
+                    
+            }
+            return cevap;
+    }
+    
+    public String[] getKeywords(String fileName) {
+        try {
+        return (new BufferedReader(new FileReader(new File(fileName)))).readLine().split(",");
+        } catch(IOException e) {}
+        return null;
+    }
+
+    public static void main(String[] args) throws IOException {
+        new Chatbotexample();
+        // TODO code application logic here
+    }   
+}
